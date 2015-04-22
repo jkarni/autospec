@@ -9,7 +9,7 @@ spec :: Spec
 spec = do
   describe "isBoring" $ do
     it "ignores files in .git/" $ do
-      isBoring "/foo/bar/.git/baz/foo.txt" `shouldBe` True
+      isBoring "/foo/bar/.git/baz/foo.txt" `shouldBe` False
 
     it "ignores files in dist/" $ do
       isBoring "/foo/bar/dist/baz/foo.txt" `shouldBe` True
