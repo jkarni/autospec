@@ -3,7 +3,7 @@
 ""
 ""   Use ":Autospec" to start autospec in a new buffer. In that buffer:
 ""       n:   go to next filename
-""       N:   go to previosu filename
+""       N:   go to previous filename
 ""       o:   open filename under cursor
 ""
 ""   Note that this requires neovim.
