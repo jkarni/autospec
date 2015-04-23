@@ -34,30 +34,23 @@ watchInput queue = void . forkIO $ do
     emitEvent Nothing queue
   emitDone queue
 
-socketName :: String
-socketName = ".autospec.sock"
-
-reportSocketName :: IO ()
-reportSocketName = withInfoColor $ putStrLn ("listening on " ++ socketName)
-
 run :: [String] -> IO ()
 run args = do
   queue <- newQueue
   watchFiles queue
   watchInput queue
   lastOutput <- newMVar (True, "")
-  reportSocketName
-  void . forkIO $ Http.start socketName (readMVar lastOutput)
-  bracket (Interpreter.new args) Interpreter.close $ \interpreter -> do
-    processQueue queue $ modifyMVar_ lastOutput $ \_ -> trigger interpreter
+  Http.withServer (readMVar lastOutput) $ do
+    bracket (Interpreter.new args) Interpreter.close $ \interpreter -> do
+      processQueue queue $ modifyMVar_ lastOutput $ \_ -> trigger interpreter
 
 runWeb :: [String] -> IO ()
 runWeb args = do
   bracket (Interpreter.new args) Interpreter.close $ \interpreter -> do
     _ <- trigger interpreter
     lock <- newMVar ()
-    reportSocketName
-    Http.start socketName $ withMVar lock $ \() -> trigger interpreter
+    Http.withServer (withMVar lock $ \() -> trigger interpreter) $ do
+      waitForever
 
 trigger :: Session -> IO (Bool, String)
 trigger interpreter = do
