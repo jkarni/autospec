@@ -13,8 +13,8 @@
 "let g:autospec_cmd = "autospec -idoctest/ghci-wrapper/src -isrc -itest test/Spec.hs"
 
 " Configurable vars ----------------------------------------------------------
-" Initialize variable if not already set
 function! <SID>InitVar(var, value)
+    " Initialize variable if not already set
     if !exists(a:var)
         exec 'let ' . a:var . ' = ' . "'" . substitute(a:value, "'", "''", "g") . "'"
         return 1
@@ -33,18 +33,21 @@ call <SID>InitVar("g:autospec_window_loc", "right")
 
 " Internal functions ---------------------------------------------------------
 
-" Search for the appropriate regex, and update the search register accordingly
 function! <SID>Search()
+    " Search for the appropriate regex, and update the search register
+    " accordingly
     let t:oldSearch = @/
     execute "silent! normal! G?" . g:allLocRegex . "\<CR>"
     let @/ = g:allLocRegex
 endfunction
 
-" Set the search register to whatever it previously was
-" TODO: Prevent higlighting if nohl was previously the case
 function! <SID>ClearSearch()
+    " Set the search register to whatever it previously was
     if exists("t:oldSearch")
         let @/ = t:oldSearch
+    endif
+    if exists("t:oldHlSearch")
+        let &hlsearch = t:oldHlSearch
     endif
 endfunction
 
@@ -53,10 +56,12 @@ function! <SID>OpenFile()
     execute "normal! vertical wincmd F"
 endfunction
 
-
 " Hooks ----------------------------------------------------------------------
 function! <SID>OnBufEnter()
+    set filetype=autospec
     setlocal isfname-=:
+    let t:oldHlSearch = &hlsearch
+    set hlsearch
     nnoremap <buffer> o :vertical wincmd F<CR>
     call <SID>Search()
     execute "silent! normal! N"
