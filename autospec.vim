@@ -41,6 +41,7 @@ function! <SID>Search()
 endfunction
 
 " Set the search register to whatever it previously was
+" TODO: Prevent higlighting if nohl was previously the case
 function! <SID>ClearSearch()
     if exists("t:oldSearch")
         let @/ = t:oldSearch
@@ -58,6 +59,7 @@ function! <SID>OnBufEnter()
     setlocal isfname-=:
     nnoremap <buffer> o :vertical wincmd F<CR>
     call <SID>Search()
+    execute "silent! normal! N"
 endfunction
 
 function! <SID>OnBufLeave()
@@ -68,6 +70,7 @@ endfunction
 function! <SID>AutoSpecSpawn()
     let splitLocation = g:autospec_window_loc ==# "left" ? "topleft " : "botright "
     silent! execute splitLocation . 'vertical ' . g:autospec_width . ' split'
+    set winfixwidth
     enew | let t:autospec_term_id = termopen(g:autospec_cmd)
     let t:autospec_buf = bufnr('%')
     let autospec_pattern = 'term://*//'.string(b:terminal_job_pid).':*'
@@ -78,7 +81,7 @@ function! <SID>AutoSpecSpawn()
         execute onbufenter
         execute onbufleave
     augroup END
-    call <SID>Search()
+    call <SID>OnBufEnter()
 endfunction
 
 " Shortcuts ------------------------------------------------------------------
